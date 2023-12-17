@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+# Database Service (MSSQL)
+  datasource:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: mssql
+    restart: always
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=aA@123456
+    ports:
+      - "1401:1433"
+    expose:
+      - 1401
+    networks:
+      - backend_mssql
+
+  # backend
+  backend:
+    build: 
+      context: ./
+      dockerfile: Dockerfile
+    container_name: backend
+    ports:
+      - 5000:5000
+    depends_on:
+      - datasource
+    environment:
+      - DB_SERVER=mssql
+      - DB_USER=sa
+      - DB_PASSWORD=aA@123456
+      - DB_PORT=1401/tcp
+      - DB_DATABASE=nodejs_app_db
+    networks:
+      - backend_mssql
+networks:
+  backend_mssql:
